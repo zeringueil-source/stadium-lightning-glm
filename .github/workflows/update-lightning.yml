@@ -1,0 +1,35 @@
+name: Update GLM lightning data
+
+on:
+  schedule:
+    # Every 5 minutes. GitHub's actual cadence can lag a few minutes under
+    # load — that's normal for the free scheduler, not a bug.
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}   # lets you trigger a run by hand from the Actions tab
+
+# The job commits the updated JSON back to this repo, so it needs write
+# access. This is NOT the default for a new repo — see the setup README.
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -r requirements.txt
+
+      - run: mkdir -p data && python fetch_glm.py
+
+      - name: Commit updated lightning data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/lightning.json
+          git diff --quiet --cached || git commit -m "Update GLM lightning data"
+          git push

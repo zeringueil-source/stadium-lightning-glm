@@ -11,3 +11,4 @@
 # Lines starting with # are ignored.
 
 KOHX
+KHDC
